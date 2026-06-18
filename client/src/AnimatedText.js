@@ -14,12 +14,16 @@ function AnimatedText({ children, className = '', forceVisible = false, typewrit
 
   useEffect(() => {
     if ((visible || forceVisible) && typewriter && typeof children === 'string') {
+      const chars = Array.from(children); // Properly handles emoji/Unicode
       let i = 0;
       setDisplayed('');
       const interval = setInterval(() => {
-        setDisplayed(prev => prev + children[i]);
+        if (i >= chars.length) {
+          clearInterval(interval);
+          return;
+        }
+        setDisplayed(prev => prev + chars[i]);
         i++;
-        if (i >= children.length) clearInterval(interval);
       }, typewriterSpeed);
       return () => clearInterval(interval);
     } else if ((visible || forceVisible) && !typewriter) {

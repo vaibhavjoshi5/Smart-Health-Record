@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { authFetch } from './utils';
+import React, { useState, useEffect, useMemo } from 'react';
+import { authFetch, getUser } from './utils';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -10,12 +10,16 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import LinearProgress from '@mui/material/LinearProgress';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 function FileUpload({ isDoctor }) {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = useMemo(() => getUser(), []);
+  const userId = user?._id || user?.id;
+
   const [patients, setPatients] = useState([]);
   const [form, setForm] = useState({
-    patientId: user.role === 'patient' ? user._id || user.id : '',
-    doctorId: user._id || user.id,
+    patientId: user?.role === 'patient' ? userId : '',
+    doctorId: userId,
     date: '',
     symptoms: '',
     diagnosis: '',
@@ -26,23 +30,29 @@ function FileUpload({ isDoctor }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!isDoctor) return;
+
+    const controller = new AbortController();
+
     const fetchPatients = async () => {
-      if (isDoctor) {
-        try {
-          const res = await authFetch(`/api/doctor/patients/${user._id || user.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            setPatients(data);
-          }
-        } catch (err) {
+      try {
+        const res = await authFetch(`/api/doctor/patients/${userId}`, { signal: controller.signal });
+        if (res.ok) {
+          const data = await res.json();
+          setPatients(data);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
           console.log('Failed to fetch patients:', err);
-          setPatients([]); // Set empty array if fails
+          setPatients([]);
         }
       }
     };
     
     fetchPatients();
-  }, [isDoctor, user]);
+
+    return () => controller.abort();
+  }, [isDoctor, userId]);
 
   const validate = () => {
     if (isDoctor && !form.patientId) return 'Select a patient';
@@ -52,12 +62,18 @@ function FileUpload({ isDoctor }) {
     if (!form.file) return 'File is required';
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (form.file && !allowedTypes.includes(form.file.type)) return 'File must be PDF or image';
+    if (form.file && form.file.size > MAX_FILE_SIZE) return 'File size must be under 10MB';
     return null;
   };
 
   const handleChange = e => {
     if (e.target.name === 'file') {
-      setForm({ ...form, file: e.target.files[0] });
+      const file = e.target.files[0];
+      if (file && file.size > MAX_FILE_SIZE) {
+        setMessage('File size must be under 10MB');
+        return;
+      }
+      setForm({ ...form, file });
     } else {
       setForm({ ...form, [e.target.name]: e.target.value });
     }
@@ -156,7 +172,7 @@ function FileUpload({ isDoctor }) {
           margin="normal"
         />
         <Box sx={{ mt: 2, mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image):</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image, max 10MB):</Typography>
           <input
             id="file"
             type="file"
@@ -181,4 +197,4 @@ FileUpload.propTypes = {
   isDoctor: PropTypes.bool,
 };
 
-export default FileUpload; 
+export default FileUpload;

@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { authFetch } from './utils';
+import React, { useEffect, useState, useMemo } from 'react';
+import { authFetch, getUser } from './utils';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
 
 function AppointmentBooking() {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = useMemo(() => getUser(), []);
+  const userId = user?._id || user?.id;
+
   const [doctors, setDoctors] = useState([]);
   const [form, setForm] = useState({ doctorId: '', date: '', time: '' });
   const [message, setMessage] = useState('');
@@ -13,36 +16,34 @@ function AppointmentBooking() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const fetchData = async () => {
-      // Fetch all doctors with error handling
-      try {
-        const res = await authFetch('/api/profile');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            setDoctors(data.filter(u => u.role === 'doctor'));
-          }
+      // ⚡ Parallel fetch - doctors + appointments load simultaneously
+      const [doctorsResult, appointmentsResult] = await Promise.allSettled([
+        authFetch('/api/profile', { signal }).then(r => r.ok ? r.json() : []),
+        authFetch(`/api/appointment/patient/${userId}`, { signal }).then(r => r.ok ? r.json() : []),
+      ]);
+
+      if (doctorsResult.status === 'fulfilled') {
+        const data = doctorsResult.value;
+        if (Array.isArray(data)) {
+          setDoctors(data.filter(u => u.role === 'doctor'));
         }
-      } catch (err) {
-        console.log('Failed to fetch doctors:', err);
-        setDoctors([]); // Set empty array if fails
       }
-      
-      // Fetch patient's appointments with error handling
-      try {
-        const res = await authFetch(`/api/appointment/patient/${user._id || user.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setAppointments(data);
-        }
-      } catch (err) {
-        console.log('Failed to fetch appointments:', err);
-        setAppointments([]); // Set empty array if fails
+
+      if (appointmentsResult.status === 'fulfilled') {
+        setAppointments(appointmentsResult.value);
       }
     };
-    
-    fetchData();
-  }, [user]);
+
+    fetchData().catch(err => {
+      if (err.name !== 'AbortError') console.error('Failed to fetch data:', err);
+    });
+
+    return () => controller.abort();
+  }, [userId]);
 
   const validate = () => {
     if (!form.doctorId) return 'Select a doctor';
@@ -65,7 +66,7 @@ function AppointmentBooking() {
       const res = await authFetch('/api/appointment/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, patientId: user._id || user.id })
+        body: JSON.stringify({ ...form, patientId: userId })
       });
       const data = await res.json();
       if (res.ok) {
@@ -81,7 +82,7 @@ function AppointmentBooking() {
   };
 
   return (
-    <div style={{ height: 600, overflowY: 'auto' }}>
+    <div style={{ overflowY: 'auto', flex: 1 }}>
       <form onSubmit={handleBook} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', width: '100%', paddingBottom: 16 }}>
         <div style={{ width: '100%' }}>
           <label style={{ display: 'block', marginBottom: 4, textAlign: 'left' }}>Doctor:</label>
@@ -164,31 +165,41 @@ function AppointmentBooking() {
             }}
           />
         </div>
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: 6, background: '#7c4dff', color: '#fff', border: '2px solid red', fontWeight: 'bold', cursor: 'pointer', marginTop: 8 }}>
-          {loading ? 'Booking...' : 'Book'}
-        </button>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          disabled={loading}
+          sx={{
+            mt: 1,
+            background: 'linear-gradient(90deg, #7f5af0 0%, #00b4d8 100%)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+            padding: '10px',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #5f3dc4 0%, #0096c7 100%)',
+            },
+          }}
+        >
+          {loading ? 'Booking...' : '📅 Book Appointment'}
+        </Button>
       </form>
-      {message && <p style={{ color: message.includes('booked') ? 'green' : 'red' }}>{message}</p>}
-      <h4>Your Appointments</h4>
-      <ul style={{ maxHeight: 120, overflowY: 'auto', paddingRight: 8 }}>
-        {appointments.map(a => (
-          <li key={a._id}>
-            {a.date ? new Date(a.date).toLocaleDateString() : ''} {a.time} with Dr. {a.doctor?.name || a.doctor} ({a.status})
-          </li>
-        ))}
-      </ul>
+      {message && <p style={{ color: message.includes('booked') ? '#81c784' : '#ef5350' }}>{message}</p>}
+      <h4 style={{ color: '#e0e0e0', marginTop: '1rem' }}>Your Appointments</h4>
+      {appointments.length === 0 ? (
+        <p style={{ color: '#b0b3bc', textAlign: 'center', padding: '0.5rem', fontSize: '0.9rem' }}>No appointments booked yet.</p>
+      ) : (
+        <ul style={{ maxHeight: 150, overflowY: 'auto', paddingRight: 8, listStyle: 'none', padding: 0 }}>
+          {appointments.map(a => (
+            <li key={a._id} style={{ background: 'rgba(127,90,240,0.10)', border: '1px solid rgba(127,90,240,0.15)', borderRadius: '8px', padding: '0.6rem 0.8rem', marginBottom: '0.5rem', color: '#f5f6fa', fontSize: '0.9rem' }}>
+              {a.date ? new Date(a.date).toLocaleDateString() : ''} {a.time} with Dr. {a.doctor?.name || a.doctor} ({a.status})
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
-/* Date/Time input icon color fix for dark mode */
-const style = document.createElement('style');
-style.innerHTML = `
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
-`;
-document.head.appendChild(style);
-
-export default AppointmentBooking; 
+export default AppointmentBooking;

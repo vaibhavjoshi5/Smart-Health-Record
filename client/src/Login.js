@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { authFetch } from './utils';
 import './App.css';
 import Box from '@mui/material/Box';
@@ -15,6 +15,11 @@ function Login() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    document.title = 'Sign In — Smart Health Record';
+  }, []);
 
   const validate = () => {
     if (!email) return 'Email is required';
@@ -39,11 +44,10 @@ function Login() {
       if (res.ok) {
         setMessage('Login successful!');
         localStorage.setItem('user', JSON.stringify({ ...data.user, token: data.token }));
-        if (data.user && data.user.role === 'doctor') {
-          navigate('/doctor');
-        } else {
-          navigate('/patient');
-        }
+        // Redirect to intended page (if redirected from PrivateRoute) or dashboard
+        const from = location.state?.from?.pathname;
+        const defaultPath = data.user?.role === 'doctor' ? '/doctor' : '/patient';
+        navigate(from || defaultPath, { replace: true });
       } else {
         setMessage(data.message || 'Login failed');
       }
@@ -57,7 +61,7 @@ function Login() {
   return (
     <>
       <div className="hero-animated-bg" />
-      <div className="auth-card-wrapper" style={{ marginTop: '10rem' }}>
+      <div className="auth-card-wrapper" style={{ marginTop: '6rem' }}>
         <Box className="auth-card">
           <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 600 }}>
             <AnimatedText typewriter={true} className="animated-text-color"><span role="img" aria-label="lock">🔒</span> Sign In</AnimatedText>

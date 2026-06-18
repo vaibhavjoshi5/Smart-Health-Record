@@ -2,49 +2,46 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { authMiddleware } = require('./auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 // POST /symptom-advice
-router.post('/symptom-advice', authMiddleware, async (req, res) => {
-  try {
-    const { symptoms } = req.body;
-    if (!symptoms) return res.status(400).json({ message: 'Symptoms required' });
-    
-    // Simple rule-based advice (Free alternative)
-    const advice = generateSimpleAdvice(symptoms);
-    res.json({ advice });
-    
-    /* OpenAI API Code (Commented out - requires paid API key)
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return res.status(500).json({ message: 'OpenAI API key not set' });
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful medical assistant. Provide brief, friendly, non-diagnostic health advice.'
-          },
-          {
-            role: 'user',
-            content: `A patient describes these symptoms: ${symptoms}. Give brief health advice or next steps.`
-          }
-        ],
-        max_tokens: 100
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+router.post('/symptom-advice', authMiddleware, asyncHandler(async (req, res) => {
+  const { symptoms } = req.body;
+  if (!symptoms) return res.status(400).json({ success: false, message: 'Symptoms required' });
+  
+  // Simple rule-based advice (Free alternative)
+  const advice = generateSimpleAdvice(symptoms);
+  res.json({ success: true, advice });
+  
+  /* OpenAI API Code (Commented out - requires paid API key)
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return res.status(500).json({ message: 'OpenAI API key not set' });
+  const response = await axios.post(
+    'https://api.openai.com/v1/chat/completions',
+    {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful medical assistant. Provide brief, friendly, non-diagnostic health advice.'
+        },
+        {
+          role: 'user',
+          content: `A patient describes these symptoms: ${symptoms}. Give brief health advice or next steps.`
         }
+      ],
+      max_tokens: 100
+    },
+    {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       }
-    );
-    const advice = response.data.choices[0].message.content.trim();
-    */
-  } catch (err) {
-    res.status(500).json({ message: 'Error getting advice', error: err.message });
-  }
-});
+    }
+  );
+  const advice = response.data.choices[0].message.content.trim();
+  */
+}));
 
 // Simple rule-based advice function (Free alternative)
 function generateSimpleAdvice(symptoms) {
@@ -74,4 +71,4 @@ function generateSimpleAdvice(symptoms) {
   return "🏥 Based on your symptoms, I recommend: 1) Rest and stay hydrated, 2) Monitor your symptoms, 3) Consult a healthcare provider if symptoms worsen or persist. This is general advice and not a substitute for professional medical consultation.";
 }
 
-module.exports = { router }; 
+module.exports = { router };

@@ -21,6 +21,10 @@ function Register() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    document.title = 'Create Account — Smart Health Record';
+  }, []);
+
   const validate = () => {
     const newErrors = {};
     if (!name) newErrors.name = 'Name is required';
@@ -133,7 +137,7 @@ function Register() {
               {loading ? '⏳ Creating Account...' : 'Create Account'}
             </Button>
           </Box>
-          {message && <Alert severity="error" sx={{ mt: 2 }}>{message}</Alert>}
+          {message && <Alert severity={message.includes('successful') ? 'success' : 'error'} sx={{ mt: 2 }}>{message}</Alert>}
           <Box className="nav-links" sx={{ mt: 2 }}>
             <Typography variant="body2">
               Already have an account? <Link to="/login">Sign In Here</Link>

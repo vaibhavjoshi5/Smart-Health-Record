@@ -1,4 +1,27 @@
-/* Modern Health App Styling */
+/* Modern Health App Styling — Design System */
+:root {
+  --color-bg-primary: #181c24;
+  --color-bg-secondary: #23272f;
+  --color-bg-card: #23272f;
+  --color-accent-purple: #7f5af0;
+  --color-accent-blue: #00b4d8;
+  --color-accent-pink: #f06292;
+  --color-accent-green: #81c784;
+  --color-text-primary: #f5f6fa;
+  --color-text-secondary: #b0b3bc;
+  --color-border: #444857;
+  --color-input-bg: #181c24;
+  --gradient-primary: linear-gradient(90deg, #7f5af0 0%, #00b4d8 100%);
+  --gradient-header: linear-gradient(90deg, #23272f 0%, #7f5af0 100%);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.25), 0 1.5px 6px rgba(0,0,0,0.18);
+  --header-height: 64px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,11 +31,11 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #181c24 0%, #23272f 100%);
-  color: #f5f6fa;
+  font-family: var(--font-family);
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  color: var(--color-text-primary);
   min-height: 100vh;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 .App {
@@ -40,10 +63,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Prevent flash of unstyled content */
-.App * {
-  transition: opacity 0.2s ease;
-}
+/* Prevent flash of unstyled content — scoped transitions only */
 
 /* Content wrapper to prevent shifts */
 .content-wrapper {
@@ -88,21 +108,22 @@ html {
 
 /* Header Styling */
 .app-header {
-  position: relative;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 90px;
-  min-height: 90px;
-  background: linear-gradient(90deg, #23272f 0%, #7f5af0 100%);
+  width: 100%;
+  height: var(--header-height);
+  min-height: var(--header-height);
+  background: var(--gradient-header);
   color: #fff;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.25);
   z-index: 1000;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem 2rem 0.5rem 2rem;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  backdrop-filter: blur(12px);
 }
 
 .app-header h1,
@@ -111,31 +132,77 @@ html {
 }
 
 .app-header h1 {
-  font-size: 2.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  margin-bottom: 0.3rem;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  margin: 0;
 }
 
 .app-header .welcome-msg {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .accent-welcome {
   color: #00b4d8;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-top: 0.2rem;
-  margin-bottom: 0.2rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+}
+
+/* Header Navigation */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-nav-btn {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.4rem 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap;
+  min-height: 36px !important;
+}
+
+.header-nav-btn:hover {
+  background: rgba(255,255,255,0.2) !important;
+  border-color: rgba(255,255,255,0.3) !important;
+  transform: translateY(-1px);
+}
+
+.header-nav-btn.active {
+  background: rgba(255,255,255,0.25) !important;
+  border-color: rgba(255,255,255,0.4) !important;
+}
+
+.header-nav-btn.logout-btn {
+  background: rgba(229, 57, 53, 0.85) !important;
+  border-color: rgba(229, 57, 53, 0.5) !important;
+}
+
+.header-nav-btn.logout-btn:hover {
+  background: rgba(183, 28, 28, 0.95) !important;
 }
 
 .main-content {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  margin-top: 3.5rem;
+  margin-top: calc(var(--header-height) + 1.5rem);
   padding-bottom: 2rem;
   display: flex;
   flex-direction: column;
@@ -147,7 +214,7 @@ html {
 .main-content.center-content {
   align-items: center;
   justify-content: flex-start;
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - var(--header-height) - 2rem);
 }
 
 .main-content.left-content {
@@ -155,11 +222,11 @@ html {
 }
 
 .main-content.center-content.login-page {
-  margin-top: 1.1rem;
+  margin-top: calc(var(--header-height) + 1.5rem);
 }
 
 .main-content.center-content.home-page {
-  margin-top: 6.5rem;
+  margin-top: calc(var(--header-height) + 1rem);
 }
 
 /* Form Container */
@@ -313,16 +380,67 @@ html {
 
 .dashboard-card-equal, .dashboard-card-equal.MuiPaper-root, .dashboard-card-equal.MuiCard-root {
   min-height: 420px;
-  max-height: 420px;
-  height: 420px;
+  max-height: 520px;
+  height: auto;
   overflow-y: auto;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25), 0 1.5px 6px 0 rgba(0,0,0,0.18);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  background: #23272f !important;
+  background: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid rgba(127,90,240,0.12);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.dashboard-card-equal:hover {
+  box-shadow: 0 6px 32px rgba(127,90,240,0.18), 0 2px 8px rgba(0,0,0,0.25);
+  border-color: rgba(127,90,240,0.25);
+}
+
+/* Card titles (h3) */
+.dashboard-card-equal h3 {
+  color: #e0e0e0 !important;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Inner list items / timeline items - dark themed */
+.dashboard-card-equal .MuiBox-root[role="listitem"],
+.dashboard-card-equal li {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px !important;
   color: #f5f6fa !important;
+}
+
+/* Ensure text inside list items is always visible */
+.dashboard-card-equal li span,
+.dashboard-card-equal li strong {
+  color: #f5f6fa !important;
+}
+
+/* Input fields inside cards */
+.dashboard-card-equal .input,
+.dashboard-card-equal input,
+.dashboard-card-equal select,
+.dashboard-card-equal textarea {
+  background: #181c24 !important;
+  color: #f5f6fa !important;
+  border: 1px solid #444857 !important;
+  border-radius: 8px !important;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.6rem;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.dashboard-card-equal input::placeholder,
+.dashboard-card-equal textarea::placeholder {
+  color: #8a8d96 !important;
+  opacity: 1;
 }
 
 .dashboard-card-equal .MuiCardContent-root {
@@ -347,21 +465,28 @@ html {
 .dashboard-card-equal input:focus-visible {
   outline: none !important;
   box-shadow: none !important;
+  border-color: #7f5af0 !important;
 }
 
 /* Responsive Design */
 @media (max-width: 900px) {
   .app-header {
-    height: 70px;
-    min-height: 70px;
-    font-size: 1.2rem;
-    padding: 0.5rem 1rem;
+    height: 56px;
+    min-height: 56px;
+    padding: 0 1rem;
+  }
+  :root {
+    --header-height: 56px;
   }
   .app-header h1 {
-    font-size: 1.4rem;
+    font-size: 1.15rem;
+  }
+  .header-nav-btn {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.78rem !important;
   }
   .main-content {
-    margin-top: 75px !important;
+    margin-top: calc(56px + 1rem) !important;
     padding-left: 1vw;
     padding-right: 1vw;
   }
@@ -382,8 +507,8 @@ html {
   }
   .dashboard-card-equal {
     min-height: 320px;
-    max-height: 320px;
-    height: 320px;
+    max-height: 420px;
+    height: auto;
   }
 }
 
@@ -394,21 +519,32 @@ html {
   }
   
   .app-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+  }
+  .header-nav {
+    gap: 0.3rem;
+  }
+  .accent-welcome {
+    display: none;
   }
 }
 
 @media (max-width: 600px) {
   .app-header {
-    height: 60px;
-    min-height: 60px;
-    padding: 0.3rem 0.5rem;
+    height: 50px;
+    min-height: 50px;
+    padding: 0 0.5rem;
   }
   .app-header h1 {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+  .header-nav-btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    min-height: 30px !important;
   }
   .main-content {
-    margin-top: 70px !important;
+    margin-top: 60px !important;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
@@ -442,13 +578,39 @@ html {
   text-decoration: underline;
 }
 
+/* Cancel Button */
+.btn-cancel {
+  background: rgba(229, 57, 53, 0.15) !important;
+  color: #ef5350 !important;
+  border: 1px solid rgba(229, 57, 53, 0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 36px;
+  width: auto;
+  margin-top: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(229, 57, 53, 0.3) !important;
+  border-color: rgba(229, 57, 53, 0.5);
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .MuiGrid-item {
   height: 100%;
 }
 
 /* Add a class for login/register card wrapper if not present */
 .auth-card-wrapper {
-  margin-top: 5.0rem;
+  margin-top: 3rem;
 }
 
 .auth-card {
@@ -494,6 +656,17 @@ input:-webkit-autofill:active {
 
 .MuiTypography-root, .MuiTypography-body2, .MuiTypography-h5, .MuiTypography-h6 {
   color: #f5f6fa !important;
+}
+
+/* Fix: text.secondary inside dark cards should be slightly muted, not invisible */
+.dashboard-card-equal .MuiTypography-colorTextSecondary {
+  color: #b0b3bc !important;
+}
+
+/* Fix: subtitle2 inside cards (labels like 'Blood Pressure:') */
+.dashboard-card-equal .MuiTypography-subtitle2 {
+  color: #c0c3cc !important;
+  font-weight: 600;
 }
 
 /* Custom dark scrollbar for all elements */
@@ -598,6 +771,33 @@ input, select, textarea {
   text-align: center;
 }
 
+/* Hero Headline */
+.hero-headline {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+
+/* Hero CTA Group */
+.hero-cta-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .hero-headline {
+    font-size: 1.8rem;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .hero-animated-bg {
   position: fixed;
   top: 0;
@@ -622,9 +822,9 @@ input, select, textarea {
   }
 }
 
-/* Animated text colors for home page */
+/* Stable text colors for home page — no more aggressive color cycling */
 .landing-container {
-  animation: textColorChange 18s ease infinite;
+  color: #f0f0ff;
 }
 
 @keyframes textColorChange {
@@ -635,23 +835,16 @@ input, select, textarea {
   100% { color: #ffffff; }
 }
 
-/* Animated link colors */
+/* Static link colors */
 .landing-container nav a,
 .landing-container ul li a {
-  animation: linkColorChange 18s ease infinite;
-}
-
-@keyframes linkColorChange {
-  0% { color: #ffd54f; }
-  25% { color: #4fc3f7; }
-  50% { color: #81c784; }
-  75% { color: #f06292; }
-  100% { color: #ffd54f; }
+  color: #b7aaff;
+  transition: color 0.3s ease;
 }
 
 .landing-container nav a:hover,
 .landing-container ul li a:hover {
-  animation: linkHoverColorChange 18s ease infinite;
+  color: #90caf9;
 }
 
 @keyframes linkHoverColorChange {
@@ -662,9 +855,9 @@ input, select, textarea {
   100% { color: #fff176; }
 }
 
-/* Animated tagline */
+/* Tagline */
 .landing-container .tagline {
-  animation: taglineColorChange 18s ease infinite;
+  color: #d0d0e8;
 }
 
 @keyframes taglineColorChange {
@@ -675,36 +868,14 @@ input, select, textarea {
   100% { color: #e8f5e8; }
 }
 
-/* Animated intro section */
+/* Intro section */
 .landing-container .intro-section {
-  animation: introColorChange 18s ease infinite;
-}
-
-@keyframes introColorChange {
-  0% { 
-    background: rgba(255, 213, 79, 0.1);
-    box-shadow: 0 2px 12px 0 rgba(255, 213, 79, 0.1);
-  }
-  25% { 
-    background: rgba(79, 195, 247, 0.1);
-    box-shadow: 0 2px 12px 0 rgba(79, 195, 247, 0.1);
-  }
-  50% { 
-    background: rgba(129, 199, 132, 0.1);
-    box-shadow: 0 2px 12px 0 rgba(129, 199, 132, 0.1);
-  }
-  75% { 
-    background: rgba(240, 98, 146, 0.1);
-    box-shadow: 0 2px 12px 0 rgba(240, 98, 146, 0.1);
-  }
-  100% { 
-    background: rgba(255, 213, 79, 0.1);
-    box-shadow: 0 2px 12px 0 rgba(255, 213, 79, 0.1);
-  }
+  background: rgba(127, 90, 240, 0.08);
+  box-shadow: 0 2px 12px 0 rgba(127, 90, 240, 0.08);
 }
 
 .landing-container .intro-section h2 {
-  animation: introTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes introTitleColorChange {
@@ -830,12 +1001,12 @@ input, select, textarea {
 /* Remove old link styling for home page */
 .landing-container nav a,
 .landing-container ul li a {
-  animation: none; /* Remove the old color animation */
+  /* no color cycling */ /* Remove the old color animation */
 }
 
 .landing-container nav a:hover,
 .landing-container ul li a:hover {
-  animation: none; /* Remove the old hover animation */
+  /* no color cycling */ /* Remove the old hover animation */
 }
 
 /* Features Section Styling */
@@ -845,7 +1016,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: featuresColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes featuresColorChange {
@@ -859,7 +1030,7 @@ input, select, textarea {
 .features-section h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  animation: featuresTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes featuresTitleColorChange {
@@ -887,7 +1058,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
-  animation: featureCardColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes featureCardColorChange {
@@ -949,7 +1120,7 @@ input, select, textarea {
   font-size: 1.4rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  animation: featureTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes featureTitleColorChange {
@@ -1117,7 +1288,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: testimonialsColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes testimonialsColorChange {
@@ -1131,7 +1302,7 @@ input, select, textarea {
 .testimonials-section h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  animation: testimonialsTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes testimonialsTitleColorChange {
@@ -1159,7 +1330,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
-  animation: testimonialCardColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes testimonialCardColorChange {
@@ -1259,7 +1430,7 @@ input, select, textarea {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.2rem;
-  animation: authorNameColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes authorNameColorChange {
@@ -1322,7 +1493,7 @@ input, select, textarea {
   margin-left: auto;
   margin-right: auto;
   padding: 3rem 2rem;
-  animation: ctaColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes ctaColorChange {
@@ -1336,7 +1507,7 @@ input, select, textarea {
 .cta-section h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  animation: ctaTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes ctaTitleColorChange {
@@ -1491,7 +1662,7 @@ input, select, textarea {
   margin-top: 4rem;
   padding: 2rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  animation: footerColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes footerColorChange {
@@ -1548,7 +1719,7 @@ input, select, textarea {
 
 .footer-link:hover {
   opacity: 1;
-  animation: footerLinkColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 .footer-link:hover::after {
@@ -1614,7 +1785,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: statsColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes statsColorChange {
@@ -1628,7 +1799,7 @@ input, select, textarea {
 .stats-section h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  animation: statsTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes statsTitleColorChange {
@@ -1656,7 +1827,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
-  animation: statCardColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes statCardColorChange {
@@ -1718,7 +1889,7 @@ input, select, textarea {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  animation: statNumberColorChange 18s ease infinite;
+  color: #90caf9;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -1801,7 +1972,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: howItWorksColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes howItWorksColorChange {
@@ -1815,7 +1986,7 @@ input, select, textarea {
 .how-it-works-section h2 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  animation: howItWorksTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes howItWorksTitleColorChange {
@@ -1854,7 +2025,7 @@ input, select, textarea {
   overflow: hidden;
   min-width: 200px;
   max-width: 250px;
-  animation: stepCardColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes stepCardColorChange {
@@ -1933,7 +2104,7 @@ input, select, textarea {
   font-size: 1.3rem;
   margin-bottom: 0.8rem;
   font-weight: 600;
-  animation: stepTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes stepTitleColorChange {
@@ -2046,7 +2217,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   position: relative;
-  animation: newsBannerColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes newsBannerColorChange {
@@ -2192,7 +2363,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: socialProofColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes socialProofColorChange {
@@ -2206,7 +2377,7 @@ input, select, textarea {
 .social-proof-section h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  animation: socialProofTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes socialProofTitleColorChange {
@@ -2234,7 +2405,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
-  animation: trustBadgeColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes trustBadgeColorChange {
@@ -2296,7 +2467,7 @@ input, select, textarea {
   font-size: 1.2rem;
   margin-bottom: 0.8rem;
   font-weight: 600;
-  animation: trustBadgeTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes trustBadgeTitleColorChange {
@@ -2326,7 +2497,7 @@ input, select, textarea {
 .trusted-by h3 {
   font-size: 1.4rem;
   margin-bottom: 1.5rem;
-  animation: trustedByTitleColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes trustedByTitleColorChange {
@@ -2352,7 +2523,7 @@ input, select, textarea {
   font-size: 1rem;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: hospitalLogoColorChange 18s ease infinite;
+  /* static */
 }
 
 @keyframes hospitalLogoColorChange {
@@ -2388,7 +2559,7 @@ input, select, textarea {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  animation: trustStatsColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes trustStatsColorChange {
@@ -2472,7 +2643,7 @@ input, select, textarea {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  animation: faqColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes faqColorChange {
@@ -2486,7 +2657,7 @@ input, select, textarea {
 .faq-section h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  animation: faqTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes faqTitleColorChange {
@@ -2509,7 +2680,7 @@ input, select, textarea {
   border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: faqItemColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes faqItemColorChange {
@@ -2570,7 +2741,7 @@ input, select, textarea {
   font-size: 1.5rem;
   font-weight: 700;
   transition: transform 0.3s ease;
-  animation: faqIconColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes faqIconColorChange {
@@ -2659,7 +2830,7 @@ input, select, textarea {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  animation: demoColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes demoColorChange {
@@ -2673,7 +2844,7 @@ input, select, textarea {
 .demo-section h2 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  animation: demoTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes demoTitleColorChange {
@@ -2707,7 +2878,7 @@ input, select, textarea {
   padding: 2rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: demoContainerColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes demoContainerColorChange {
@@ -2926,7 +3097,7 @@ input, select, textarea {
   text-align: left;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: demoFeatureColorChange 18s ease infinite;
+  /* no color cycling */
 }
 
 @keyframes demoFeatureColorChange {
@@ -2973,7 +3144,7 @@ input, select, textarea {
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  animation: demoFeatureTitleColorChange 18s ease infinite;
+  color: #b7aaff;
 }
 
 @keyframes demoFeatureTitleColorChange {
@@ -3066,13 +3237,18 @@ input, select, textarea {
 }
 
 .animated-text-color {
-  animation: textColorChange 6s infinite alternate;
+  animation: textColorChangeSubtle 20s ease-in-out infinite alternate;
 }
 
-@keyframes textColorChange {
-  0% { color: #fff; }
-  25% { color: #7f5af0; }
-  50% { color: #00b4d8; }
-  75% { color: #ff6f91; }
-  100% { color: #fff; }
+@keyframes textColorChangeSubtle {
+  0% { color: #e0e0ff; }
+  33% { color: #b7aaff; }
+  66% { color: #90caf9; }
+  100% { color: #e0e0ff; }
+}
+
+/* Date/Time input icon color fix for dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }

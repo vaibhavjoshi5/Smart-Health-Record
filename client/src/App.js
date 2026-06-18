@@ -1,23 +1,47 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
-import Login from './Login';
-import Register from './Register';
-import PatientDashboard from './PatientDashboard';
-import DoctorPanel from './DoctorPanel';
-import Profile from './Profile';
-import ForgotPassword from './ForgotPassword';
-import ResetPassword from './ResetPassword';
 import PropTypes from 'prop-types';
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
-import AIChatbot from './AIChatbot';
 import Fade from '@mui/material/Fade';
 import ScrollToTop from './ScrollToTop';
 import Button from '@mui/material/Button';
 import AnimatedText from './AnimatedText';
+import { getUser } from './utils';
+
+// ─── Lazy Loading: Code-split each route for faster initial load ───
+const Login = React.lazy(() => import('./Login'));
+const Register = React.lazy(() => import('./Register'));
+const PatientDashboard = React.lazy(() => import('./PatientDashboard'));
+const DoctorPanel = React.lazy(() => import('./DoctorPanel'));
+const Profile = React.lazy(() => import('./Profile'));
+const ForgotPassword = React.lazy(() => import('./ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./ResetPassword'));
+const AIChatbot = React.lazy(() => import('./AIChatbot'));
+
+// ─── Loading Fallback Component ───
+function LoadingFallback() {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '60vh',
+      flexDirection: 'column',
+      gap: '1rem',
+    }}>
+      <div className="spinner" />
+      <p style={{ color: '#b7aaff', fontSize: '1.1rem' }}>Loading...</p>
+    </div>
+  );
+}
 
 function Home() {
   const [faqOpen, setFaqOpen] = React.useState([false, false, false, false, false, false]);
+
+  React.useEffect(() => {
+    document.title = 'Smart Health Record — Your Digital Health Platform';
+  }, []);
 
   const toggleFAQ = (index) => {
     setFaqOpen(prev => {
@@ -71,14 +95,19 @@ function Home() {
       <div className="landing-container fade-in slide-in-up">
         <div className="hero-content">
           <div className="hero-text">
-            <nav>
-              <ul className="vertical-links">
-                <li><Link to="/login"><AnimatedText>Login</AnimatedText></Link></li>
-                <li><Link to="/register"><AnimatedText>Register</AnimatedText></Link></li>
-              </ul>
-            </nav>
-            <p className="tagline"><AnimatedText>Welcome to your digital health record system.</AnimatedText></p>
-            <div className="intro-section">
+            <h2 className="hero-headline"><AnimatedText className="animated-text-color">Your Health Records, Simplified.</AnimatedText></h2>
+            <p className="tagline"><AnimatedText>Securely manage your medical records, appointments, and health information — all in one place.</AnimatedText></p>
+            <div className="hero-cta-group">
+              <Link to="/register" className="cta-button primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                <span>Get Started Free</span>
+                <span>🚀</span>
+              </Link>
+              <Link to="/login" className="cta-button secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                <span>Sign In</span>
+                <span>→</span>
+              </Link>
+            </div>
+            <div className="intro-section" style={{ marginTop: '2rem' }}>
               <h2><AnimatedText>What is Smart Health Record?</AnimatedText></h2>
               <p>
                 <AnimatedText><b>Smart Health Record</b> is a digital platform to securely manage your medical records, appointments, and health information. Patients and doctors can easily access, upload, and share health data anytime, anywhere.</AnimatedText>
@@ -151,12 +180,12 @@ function Home() {
           <div className="news-icon">📢</div>
           <div className="news-ticker">
             <div className="ticker-content">
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>🚀 New: AI-powered symptom analysis now available!</AnimatedText></span>
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>🔒 Enhanced security with biometric authentication</AnimatedText></span>
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>📱 Mobile app now available on iOS and Android</AnimatedText></span>
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>🏥 Partnered with 50+ new hospitals this month</AnimatedText></span>
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>⚡ Lightning-fast upload speeds with new compression</AnimatedText></span>
-              <span className="news-item"><AnimatedText forceVisible={true} typewriter={true}>🎉 10,000+ new users joined this week!</AnimatedText></span>
+              <span className="news-item">🚀 New: AI-powered symptom analysis now available!</span>
+              <span className="news-item">🔒 Enhanced security with biometric authentication</span>
+              <span className="news-item">📱 Mobile app now available on iOS and Android</span>
+              <span className="news-item">🏥 Partnered with 50+ new hospitals this month</span>
+              <span className="news-item">⚡ Lightning-fast upload speeds with new compression</span>
+              <span className="news-item">🎉 10,000+ new users joined this week!</span>
             </div>
           </div>
         </div>
@@ -507,11 +536,11 @@ function Home() {
         
         <footer className="footer">
           <div className="footer-content">
-            <p>&copy; 2024 Smart Health Record</p>
+            <p>&copy; {new Date().getFullYear()} Smart Health Record</p>
             <div className="footer-links">
-              <a href="#" className="footer-link">Privacy Policy</a>
+              <Link to="/" className="footer-link">Privacy Policy</Link>
               <span className="footer-separator">|</span>
-              <a href="#" className="footer-link">Contact Us</a>
+              <Link to="/" className="footer-link">Contact Us</Link>
             </div>
           </div>
         </footer>
@@ -524,11 +553,22 @@ function LoginWithForgot() {
   return <Login />;
 }
 
+// ─── Auth Route Guards (Industry Standard) ───
+
+/**
+ * PrivateRoute — Protects routes that require authentication.
+ * - Not logged in → Redirect to /login (saves intended destination)
+ * - Wrong role → Redirect to correct dashboard
+ */
 function PrivateRoute({ children, role }) {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = getUser();
   const location = useLocation();
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
-  if (role && user.role !== role) return <Navigate to="/" replace />;
+  if (role && user.role !== role) {
+    // Redirect to correct dashboard instead of dead-end
+    const correctPath = user.role === 'doctor' ? '/doctor' : '/patient';
+    return <Navigate to={correctPath} replace />;
+  }
   return children;
 }
 
@@ -537,25 +577,49 @@ PrivateRoute.propTypes = {
   role: PropTypes.string,
 };
 
-function App() {
-  // On app load, redirect if already logged in (only for login/register pages)
-  React.useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-      if (window.location.pathname === '/login' || window.location.pathname === '/register') {
-        if (user.role === 'doctor') window.location.replace('/doctor');
-        else window.location.replace('/patient');
-      }
-    }
-  }, []);
+/**
+ * GuestRoute — Protects routes that should only be visible to non-logged-in users.
+ * - Logged in → Redirect to dashboard
+ * - Not logged in → Show the page
+ */
+function GuestRoute({ children }) {
+  const user = getUser();
+  if (user) {
+    const dashboardPath = user.role === 'doctor' ? '/doctor' : '/patient';
+    return <Navigate to={dashboardPath} replace />;
+  }
+  return children;
+}
 
-  const theme = createTheme({
+GuestRoute.propTypes = {
+  children: PropTypes.node,
+};
+
+/**
+ * HomeRoute — Landing page logic:
+ * - Logged in → Redirect to dashboard (don't show marketing page)
+ * - Not logged in → Show the landing/marketing page
+ */
+function HomeRoute() {
+  const user = getUser();
+  if (user) {
+    const dashboardPath = user.role === 'doctor' ? '/doctor' : '/patient';
+    return <Navigate to={dashboardPath} replace />;
+  }
+  return <div className="main-content center-content home-page"><Home /></div>;
+}
+
+function App() {
+  const theme = React.useMemo(() => createTheme({
     palette: {
       primary: { main: '#764ba2' },
       secondary: { main: '#667eea' },
     },
     shape: { borderRadius: 12 },
-  });
+    typography: {
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    },
+  }), []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -571,64 +635,104 @@ function App() {
 function AppWithFade() {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = getUser();
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
-  // Show welcome message and AI Chatbot only on /patient route
-  const showPatientWelcome = location.pathname === '/patient' && user;
-  const showDoctorWelcome = location.pathname === '/doctor' && user;
-  const showPatientChatbot = location.pathname === '/patient' && user;
+  const isPatient = user && user.role === 'patient';
+  const isDoctor = user && user.role === 'doctor';
+  const dashboardPath = isDoctor ? '/doctor' : '/patient';
 
   return (
     <div className="App">
-      <div className="app-header" style={{ position: 'fixed' }}>
-        <h1>🏥 Smart Health Record</h1>
-        {showPatientWelcome && (
-          <div className="welcome-msg accent-welcome">
-            Welcome, {user.name}! 👋
-          </div>
-        )}
-        {showDoctorWelcome && (
-          <div className="welcome-msg accent-welcome">
-            Doctor Panel - {user.name}! 👨‍⚕️
-          </div>
-        )}
-        {showPatientChatbot && (
-          <Button
-            variant="contained"
-            sx={{ position: 'absolute', top: 24, right: 150, backgroundColor: '#7c4dff', color: '#fff', '&:hover': { backgroundColor: '#651fff' } }}
-            onClick={() => navigate('/ai-chatbot')}
-          >
-            AI Chatbot
-          </Button>
-        )}
-        {user && (
-          <Button
-            variant="contained"
-            sx={{ position: 'absolute', top: 24, right: 32, backgroundColor: '#e53935', color: '#fff', '&:hover': { backgroundColor: '#b71c1c' } }}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
-        )}
+      <div className="app-header">
+        <div className="header-left">
+          <h1>
+            <Link to={user ? dashboardPath : '/'} style={{ color: '#fff', textDecoration: 'none' }}>
+              🏥 Smart Health Record
+            </Link>
+          </h1>
+          {user && (
+            <span className="accent-welcome">
+              {isDoctor ? `Dr. ${user.name}` : user.name} 👋
+            </span>
+          )}
+        </div>
+        <div className="header-nav">
+          {user && (
+            <>
+              <Button
+                className={`header-nav-btn ${location.pathname === dashboardPath ? 'active' : ''}`}
+                onClick={() => navigate(dashboardPath)}
+              >
+                📊 Dashboard
+              </Button>
+              <Button
+                className={`header-nav-btn ${location.pathname === '/profile' ? 'active' : ''}`}
+                onClick={() => navigate('/profile')}
+              >
+                👤 Profile
+              </Button>
+              {isPatient && (
+                <Button
+                  className={`header-nav-btn ${location.pathname === '/ai-chatbot' ? 'active' : ''}`}
+                  onClick={() => navigate('/ai-chatbot')}
+                >
+                  🤖 AI Chat
+                </Button>
+              )}
+              <Button
+                className="header-nav-btn logout-btn"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </>
+          )}
+          {!user && (
+            <>
+              <Button
+                className={`header-nav-btn ${location.pathname === '/login' ? 'active' : ''}`}
+                onClick={() => navigate('/login')}
+              >
+                Sign In
+              </Button>
+              <Button
+                className={`header-nav-btn ${location.pathname === '/register' ? 'active' : ''}`}
+                onClick={() => navigate('/register')}
+              >
+                Register
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       <Fade in={true} timeout={500} key={location.key}>
         <div>
-          <Routes location={location}>
-            <Route path="/" element={<div className="main-content center-content home-page"><Home /></div>} />
-            <Route path="/login" element={<div className="main-content center-content login-page"><LoginWithForgot /></div>} />
-            <Route path="/register" element={<div className="main-content center-content"><Register /></div>} />
-            <Route path="/forgot-password" element={<div className="main-content center-content"><ForgotPassword /></div>} />
-            <Route path="/reset-password/:token" element={<div className="main-content center-content"><ResetPassword /></div>} />
-            <Route path="/patient" element={<div className="main-content left-content"><PrivateRoute role="patient"><PatientDashboard /></PrivateRoute></div>} />
-            <Route path="/doctor" element={<div className="main-content left-content"><PrivateRoute role="doctor"><DoctorPanel /></PrivateRoute></div>} />
-            <Route path="/profile" element={<div className="main-content left-content"><PrivateRoute><Profile /></PrivateRoute></div>} />
-            <Route path="/ai-chatbot" element={<AIChatbot />} />
-          </Routes>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes location={location}>
+              {/* Public — Landing page (redirects to dashboard if logged in) */}
+              <Route path="/" element={<HomeRoute />} />
+
+              {/* Guest-only — Login/Register (redirects to dashboard if already logged in) */}
+              <Route path="/login" element={<GuestRoute><div className="main-content center-content login-page"><LoginWithForgot /></div></GuestRoute>} />
+              <Route path="/register" element={<GuestRoute><div className="main-content center-content"><Register /></div></GuestRoute>} />
+              <Route path="/forgot-password" element={<GuestRoute><div className="main-content center-content"><ForgotPassword /></div></GuestRoute>} />
+              <Route path="/reset-password/:token" element={<div className="main-content center-content"><ResetPassword /></div>} />
+
+              {/* Private — Requires authentication */}
+              <Route path="/patient" element={<div className="main-content left-content"><PrivateRoute role="patient"><PatientDashboard /></PrivateRoute></div>} />
+              <Route path="/doctor" element={<div className="main-content left-content"><PrivateRoute role="doctor"><DoctorPanel /></PrivateRoute></div>} />
+              <Route path="/profile" element={<div className="main-content left-content"><PrivateRoute><Profile /></PrivateRoute></div>} />
+              <Route path="/ai-chatbot" element={<PrivateRoute><AIChatbot /></PrivateRoute>} />
+
+              {/* Catch-all — Redirect unknown routes */}
+              <Route path="*" element={<Navigate to={user ? dashboardPath : '/'} replace />} />
+            </Routes>
+          </Suspense>
         </div>
       </Fade>
     </div>
