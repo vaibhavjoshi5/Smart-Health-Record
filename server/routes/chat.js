@@ -8,7 +8,9 @@ const { authMiddleware } = require('./auth');
 const { AppError } = require('../middleware/errorHandler');
 
 // Ensure uploads/chat directory exists
-const uploadDir = path.join(__dirname, '../uploads/chat');
+const uploadDir = process.env.VERCEL
+  ? path.join('/tmp', 'chat-uploads')
+  : path.join(__dirname, '../uploads/chat');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
