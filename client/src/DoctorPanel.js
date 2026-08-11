@@ -1,17 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import FileUpload from './FileUpload';
 import { authFetch, getUser } from './utils';
 import './App.css';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import AnimatedText from './AnimatedText';
 
 function DoctorPanel() {
   const user = useMemo(() => getUser(), []);
   const userId = user?._id || user?.id;
-  const navigate = useNavigate();
 
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState('');

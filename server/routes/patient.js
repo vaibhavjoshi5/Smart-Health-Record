@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const MedicalRecord = require('../models/MedicalRecord');
 const User = require('../models/User');
-const { authMiddleware } = require('./auth');
+const { authMiddleware, requireSelfOrRole } = require('./auth');
 const asyncHandler = require('../middleware/asyncHandler');
 const { AppError } = require('../middleware/errorHandler');
 
 // 1. View medical timeline (all records, sorted by date desc)
-router.get('/timeline/:patientId', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/timeline/:patientId', authMiddleware, requireSelfOrRole('doctor'), asyncHandler(async (req, res) => {
   const records = await MedicalRecord.find({ patient: req.params.patientId })
     .sort({ date: -1 })
     .populate('doctor', 'name');
@@ -15,7 +15,7 @@ router.get('/timeline/:patientId', authMiddleware, asyncHandler(async (req, res)
 }));
 
 // 2. Search records by date or symptom
-router.get('/search/:patientId', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/search/:patientId', authMiddleware, requireSelfOrRole('doctor'), asyncHandler(async (req, res) => {
   const { date, symptom } = req.query;
   let query = { patient: req.params.patientId };
   if (date) query.date = new Date(date);
@@ -25,7 +25,7 @@ router.get('/search/:patientId', authMiddleware, asyncHandler(async (req, res) =
 }));
 
 // 3. Get health graphs data (BP, Sugar if present in doctorNotes or diagnosis)
-router.get('/health-graphs/:patientId', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/health-graphs/:patientId', authMiddleware, requireSelfOrRole('doctor'), asyncHandler(async (req, res) => {
   const records = await MedicalRecord.find({ patient: req.params.patientId });
   // Extract BP and Sugar values from doctorNotes or diagnosis (simple regex)
   const bpData = [];
@@ -40,7 +40,7 @@ router.get('/health-graphs/:patientId', authMiddleware, asyncHandler(async (req,
 }));
 
 // 4. Get emergency contact QR code data (return contact info for now)
-router.get('/emergency-contact/:patientId', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/emergency-contact/:patientId', authMiddleware, requireSelfOrRole('doctor'), asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.patientId);
   if (!user || !user.emergencyContact) {
     throw new AppError('No emergency contact found', 404);

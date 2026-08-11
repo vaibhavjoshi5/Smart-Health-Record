@@ -22,7 +22,7 @@ function AppointmentBooking() {
     const fetchData = async () => {
       // ⚡ Parallel fetch - doctors + appointments load simultaneously
       const [doctorsResult, appointmentsResult] = await Promise.allSettled([
-        authFetch('/api/profile', { signal }).then(r => r.ok ? r.json() : []),
+        authFetch('/api/profile/doctors', { signal }).then(r => r.ok ? r.json() : []),
         authFetch(`/api/appointment/patient/${userId}`, { signal }).then(r => r.ok ? r.json() : []),
       ]);
 

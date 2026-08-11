@@ -19,7 +19,7 @@ function FileUpload({ isDoctor }) {
   const [patients, setPatients] = useState([]);
   const [form, setForm] = useState({
     patientId: user?.role === 'patient' ? userId : '',
-    doctorId: userId,
+    doctorId: user?.role === 'doctor' ? userId : '',
     date: '',
     symptoms: '',
     diagnosis: '',
@@ -172,7 +172,7 @@ function FileUpload({ isDoctor }) {
           margin="normal"
         />
         <Box sx={{ mt: 2, mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image, max 10MB):</Typography>
+          <Typography component="label" htmlFor="file" variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image, max 10MB):</Typography>
           <input
             id="file"
             type="file"

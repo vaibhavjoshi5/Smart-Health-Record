@@ -16,7 +16,9 @@ Compact full-stack application for managing appointments, medical records, file 
 - Unit/integration tests for server routes
 
 ## Quick setup (local)
-1. Install server dependencies
+1. Copy `server/.env.example` to `server/.env` and replace the placeholder values.
+
+2. Install server dependencies
 
 ```bash
 cd smart-health-record/server
@@ -24,7 +26,7 @@ npm install
 npm run dev
 ```
 
-2. Install and run client
+3. Install and run client
 
 ```bash
 cd smart-health-record/client
@@ -32,7 +34,14 @@ npm install
 npm start
 ```
 
-Or run the included `start-app.bat` from the project root on Windows.
+Or run `npm install` and `npm start` from the project root after installing both app folders.
+
+## Required environment variables
+
+- `MONGO_URI`: MongoDB connection string
+- `JWT_SECRET`: long, random signing secret
+- `FRONTEND_URL`: allowed browser origin and password-reset URL
+- `EMAIL_USER` / `EMAIL_PASS`: Gmail credentials for password-reset email
 
 ## Production build (client)
 

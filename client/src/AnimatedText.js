@@ -36,6 +36,10 @@ function AnimatedText({ children, className = '', forceVisible = false, typewrit
       setVisible(true);
       return;
     }
+    if (typeof window.IntersectionObserver !== 'function') {
+      setVisible(true);
+      return;
+    }
     const observer = new window.IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) setVisible(true);
@@ -64,4 +68,4 @@ AnimatedText.propTypes = {
   typewriterSpeed: PropTypes.number,
 };
 
-export default AnimatedText; 
+export default AnimatedText;

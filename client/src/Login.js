@@ -76,7 +76,7 @@ function Login() {
               fullWidth
               margin="normal"
               required
-              InputProps={{ startAdornment: <span role="img" aria-label="email">📧</span> }}
+              InputProps={{ startAdornment: <span aria-hidden="true">📧</span> }}
             />
             <TextField
               id="password"
@@ -88,7 +88,7 @@ function Login() {
               fullWidth
               margin="normal"
               required
-              InputProps={{ startAdornment: <span role="img" aria-label="lock">🔒</span> }}
+              InputProps={{ startAdornment: <span aria-hidden="true">🔒</span> }}
             />
             <Button
               type="submit"
@@ -119,4 +119,4 @@ function Login() {
   );
 }
 
-export default Login; 
+export default Login;

@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
@@ -82,7 +83,7 @@ function Register() {
               required
               error={!!errors.name}
               helperText={errors.name}
-              InputProps={{ startAdornment: <span role="img" aria-label="user">👤</span> }}
+              InputProps={{ startAdornment: <span aria-hidden="true">👤</span> }}
             />
             <TextField
               id="email"
@@ -95,7 +96,7 @@ function Register() {
               required
               error={!!errors.email}
               helperText={errors.email}
-              InputProps={{ startAdornment: <span role="img" aria-label="email">📧</span> }}
+              InputProps={{ startAdornment: <span aria-hidden="true">📧</span> }}
             />
             <TextField
               id="password"
@@ -109,14 +110,15 @@ function Register() {
               required
               error={!!errors.password}
               helperText={errors.password}
-              InputProps={{ startAdornment: <span role="img" aria-label="lock">🔒</span> }}
+              InputProps={{ startAdornment: <span aria-hidden="true">🔒</span> }}
             />
             <Box sx={{ mt: 2, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1 }}>
+              <InputLabel id="role-label" htmlFor="role" sx={{ fontWeight: 500, mb: 1 }}>
                 👨‍⚕️ Account Type:
-              </Typography>
+              </InputLabel>
               <Select
                 id="role"
+                labelId="role-label"
                 value={role}
                 onChange={e => setRole(e.target.value)}
                 fullWidth
@@ -149,4 +151,4 @@ function Register() {
   );
 }
 
-export default Register; 
+export default Register;

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import FileUpload from './FileUpload';
 import AppointmentBooking from './AppointmentBooking';
 import { authFetch, getUser } from './utils';
@@ -16,7 +15,6 @@ import AnimatedText from './AnimatedText';
 function PatientDashboard() {
   const user = useMemo(() => getUser(), []);
   const userId = user?._id || user?.id;
-  const navigate = useNavigate();
   
   const [timeline, setTimeline] = useState([]);
   const [searchDate, setSearchDate] = useState('');

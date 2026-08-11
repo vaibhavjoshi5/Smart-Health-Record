@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import Profile from './Profile';
+import { MemoryRouter } from 'react-router-dom';
 
 beforeAll(() => {
   window.localStorage.setItem('user', JSON.stringify({ _id: '1', name: 'Test', role: 'patient' }));
@@ -16,12 +17,13 @@ test('renders Profile component', async () => {
         allergies: ['pollen'],
         chronicDiseases: ['asthma'],
         emergencyContact: { name: 'Mom', phone: '123', relation: 'Mother' }
-      })
+      }),
+      ok: true
     })
   );
-  render(<Profile />);
+  render(<MemoryRouter><Profile /></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: /profile/i })).toBeInTheDocument();
   expect(await screen.findByText(/name:/i)).toBeInTheDocument();
   expect(await screen.findByText(/email:/i)).toBeInTheDocument();
   global.fetch.mockRestore();
-}); 
+});

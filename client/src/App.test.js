@@ -3,6 +3,6 @@ import App from './App';
 
 test('renders main heading', () => {
   render(<App />);
-  const heading = screen.getByRole('heading', { name: /smart health record/i });
-  expect(heading).toBeInTheDocument();
+  const headings = screen.getAllByRole('heading', { name: /smart health record/i });
+  expect(headings.length).toBeGreaterThan(0);
 });

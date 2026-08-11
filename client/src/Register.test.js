@@ -29,7 +29,6 @@ describe('Register Component (API)', () => {
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByLabelText(/account type/i), { target: { value: 'patient' } });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
     // Success message
@@ -89,7 +88,6 @@ describe('Register Component (API Error)', () => {
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByLabelText(/account type/i), { target: { value: 'patient' } });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     expect(await screen.findByText(/email already exists/i)).toBeInTheDocument();
     global.fetch.mockRestore();
@@ -110,7 +108,6 @@ describe('Register Component (Loading State)', () => {
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test User' } });
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByLabelText(/account type/i), { target: { value: 'patient' } });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled();
     // Finish fetch
@@ -125,12 +122,12 @@ describe('Register Component (Loading State)', () => {
   });
 });
 
-test('renders Register form', () => {
+test('renders Register form', async () => {
   render(<BrowserRouter><Register /></BrowserRouter>);
-  expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: /create account/i })).toBeInTheDocument();
   expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
   expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   expect(screen.getByLabelText(/account type/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
-}); 
+});
