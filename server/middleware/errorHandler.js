@@ -43,7 +43,7 @@ const handleJWTExpiredError = () =>
 
 const handleMulterError = (err) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return new AppError('File too large. Maximum size is 10MB.', 400);
+    return new AppError('File too large. Maximum size is 4MB.', 400);
   }
   return new AppError(`File upload error: ${err.message}`, 400);
 };

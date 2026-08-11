@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import LinearProgress from '@mui/material/LinearProgress';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 
 function FileUpload({ isDoctor }) {
   const user = useMemo(() => getUser(), []);
@@ -62,7 +62,7 @@ function FileUpload({ isDoctor }) {
     if (!form.file) return 'File is required';
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (form.file && !allowedTypes.includes(form.file.type)) return 'File must be PDF or image';
-    if (form.file && form.file.size > MAX_FILE_SIZE) return 'File size must be under 10MB';
+    if (form.file && form.file.size > MAX_FILE_SIZE) return 'File size must be under 4MB';
     return null;
   };
 
@@ -70,7 +70,7 @@ function FileUpload({ isDoctor }) {
     if (e.target.name === 'file') {
       const file = e.target.files[0];
       if (file && file.size > MAX_FILE_SIZE) {
-        setMessage('File size must be under 10MB');
+        setMessage('File size must be under 4MB');
         return;
       }
       setForm({ ...form, file });
@@ -172,7 +172,7 @@ function FileUpload({ isDoctor }) {
           margin="normal"
         />
         <Box sx={{ mt: 2, mb: 2 }}>
-          <Typography component="label" htmlFor="file" variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image, max 10MB):</Typography>
+          <Typography component="label" htmlFor="file" variant="subtitle2" sx={{ mb: 0.5 }}>File (PDF/Image, max 4MB):</Typography>
           <input
             id="file"
             type="file"

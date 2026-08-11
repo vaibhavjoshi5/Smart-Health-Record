@@ -3,25 +3,14 @@ const router = express.Router();
 const multer = require('multer');
 const MedicalRecord = require('../models/MedicalRecord');
 const User = require('../models/User');
-const path = require('path');
-const fs = require('fs');
 const { authMiddleware, requireSelfOrRole } = require('./auth');
 const asyncHandler = require('../middleware/asyncHandler');
 const { AppError } = require('../middleware/errorHandler');
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (allowed.includes(file.mimetype)) {
@@ -41,7 +30,6 @@ router.post('/upload', authMiddleware, upload.single('file'), asyncHandler(async
   if (req.user.role === 'patient' && String(patientId) !== String(req.user.id)) {
     return res.status(403).json({ success: false, message: 'Patients can only upload their own records' });
   }
-  const fileUrl = req.file ? req.file.path : null;
   const record = new MedicalRecord({
     patient: patientId,
     doctor: req.user.role === 'doctor' ? doctorId : undefined,
@@ -49,7 +37,9 @@ router.post('/upload', authMiddleware, upload.single('file'), asyncHandler(async
     symptoms,
     diagnosis,
     doctorNotes,
-    fileUrl
+    fileName: req.file?.originalname,
+    fileType: req.file?.mimetype,
+    fileData: req.file?.buffer
   });
   await record.save();
   res.status(201).json({ success: true, message: 'Medical record uploaded', record });
@@ -63,14 +53,16 @@ router.get('/patient/:patientId', authMiddleware, requireSelfOrRole('doctor'), a
 
 // Download a record file
 router.get('/download/:id', authMiddleware, asyncHandler(async (req, res) => {
-  const record = await MedicalRecord.findById(req.params.id);
-  if (!record || !record.fileUrl) {
+  const record = await MedicalRecord.findById(req.params.id).select('+fileData');
+  if (!record || !record.fileData) {
     throw new AppError('File not found', 404);
   }
   if (req.user.role !== 'doctor' && String(record.patient) !== String(req.user.id)) {
     throw new AppError('You are not allowed to download this record', 403);
   }
-  res.download(path.resolve(record.fileUrl));
+  res.setHeader('Content-Type', record.fileType || 'application/octet-stream');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(record.fileName || 'medical-record')}"`);
+  res.send(record.fileData);
 }));
 
 module.exports = { router };
