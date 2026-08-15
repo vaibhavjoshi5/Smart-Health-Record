@@ -12,12 +12,6 @@
     "test": "cd server && npm test"
   },
   "dependencies": {
-    "concurrently": "^8.2.0",
-    "multer": "^2.0.1",
-    "react-router-dom": "^7.6.3"
-  },
-  "devDependencies": {
-    "jest": "^30.0.3",
-    "supertest": "^7.1.1"
+    "concurrently": "^8.2.0"
   }
 }

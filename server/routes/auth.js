@@ -9,14 +9,20 @@ const { body, validationResult } = require('express-validator');
 const asyncHandler = require('../middleware/asyncHandler');
 const logger = require('../config/logger');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
+}
 
 // JWT middleware
 function authMiddleware(req, res, next) {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ success: false, message: 'No token, authorization denied' });
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
     next();
   } catch (err) {
@@ -68,7 +74,7 @@ router.post('/login', [
 
   const token = jwt.sign(
     { id: user._id, role: user.role, email: user.email },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: '7d' }
   );
 
@@ -139,5 +145,18 @@ router.post('/reset-password/:token', [
 
 module.exports = {
   router,
-  authMiddleware
+  authMiddleware,
+  requireRole: (...roles) => (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'You are not allowed to perform this action' });
+    }
+    next();
+  },
+  requireSelfOrRole: (...roles) => (req, res, next) => {
+    const requestedUserId = req.params.userId || req.params.patientId || req.params.doctorId;
+    if (String(req.user?.id) !== String(requestedUserId) && !roles.includes(req.user?.role)) {
+      return res.status(403).json({ success: false, message: 'You are not allowed to access this user' });
+    }
+    next();
+  }
 };

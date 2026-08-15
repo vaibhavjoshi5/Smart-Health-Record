@@ -8,6 +8,9 @@ const medicalRecordSchema = new mongoose.Schema({
   diagnosis: { type: String },
   doctorNotes: { type: String },
   fileUrl: { type: String }, // URL or path to uploaded file (PDF/image)
+  fileName: { type: String },
+  fileType: { type: String },
+  fileData: { type: Buffer, select: false },
 }, { timestamps: true });
 
-module.exports = mongoose.model('MedicalRecord', medicalRecordSchema); 
+module.exports = mongoose.model('MedicalRecord', medicalRecordSchema);

@@ -106,7 +106,7 @@ describe('Appointment API', () => {
       .set('Authorization', 'Bearer ' + doctorToken)
       .send({ status: 'confirmed' });
     expect(res.statusCode).toBe(200);
-    expect(res.body && res.body.status).toBe('confirmed');
+    expect(res.body.appointment && res.body.appointment.status).toBe('confirmed');
   });
 
   it('should cancel appointment', async () => {
@@ -122,4 +122,4 @@ describe('Appointment API', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body && res.body.message).toMatch(/cancelled/i);
   });
-}); 
+});

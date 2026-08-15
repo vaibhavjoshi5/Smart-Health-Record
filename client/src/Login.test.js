@@ -61,8 +61,8 @@ describe('Login Component', () => {
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/patient'));
+    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/patient', { replace: true }));
     expect(window.localStorage.getItem('user')).toContain('fake-jwt-token');
     global.fetch.mockRestore();
   });
-}); 
+});
